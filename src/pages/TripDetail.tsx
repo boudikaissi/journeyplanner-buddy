@@ -8,6 +8,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import type { Trip } from "@/types/trip";
+import TripTimeline from "@/components/TripTimeline";
+import TripParticipants from "@/components/TripParticipants";
+import TripIdeas from "@/components/TripIdeas";
+import TripChecklist from "@/components/TripChecklist";
+import TripChat from "@/components/TripChat";
 
 const TripDetail = () => {
   const { id } = useParams();
@@ -178,10 +183,12 @@ const TripDetail = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid grid-cols-4 w-full">
+              <TabsList className="grid grid-cols-6 w-full">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="itinerary">Itinerary</TabsTrigger>
-                <TabsTrigger value="places">Places</TabsTrigger>
+                <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                <TabsTrigger value="participants">Participants</TabsTrigger>
+                <TabsTrigger value="ideas">Ideas</TabsTrigger>
+                <TabsTrigger value="checklist">Checklist</TabsTrigger>
                 <TabsTrigger value="chat">Chat</TabsTrigger>
               </TabsList>
 
@@ -242,37 +249,31 @@ const TripDetail = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="itinerary">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Trip Itinerary</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">Detailed itinerary planning coming soon...</p>
-                  </CardContent>
-                </Card>
+              <TabsContent value="timeline" className="space-y-6">
+                <TripTimeline 
+                  tripId={trip.id}
+                  startDate={trip.startDate}
+                  endDate={trip.endDate}
+                />
               </TabsContent>
 
-              <TabsContent value="places">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pinned Places</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">Discover and save places to visit...</p>
-                  </CardContent>
-                </Card>
+              <TabsContent value="participants" className="space-y-6">
+                <TripParticipants 
+                  tripId={trip.id}
+                  participants={trip.participants}
+                />
               </TabsContent>
 
-              <TabsContent value="chat">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Group Chat</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">Stay connected with your travel group...</p>
-                  </CardContent>
-                </Card>
+              <TabsContent value="ideas" className="space-y-6">
+                <TripIdeas tripId={trip.id} />
+              </TabsContent>
+
+              <TabsContent value="checklist" className="space-y-6">
+                <TripChecklist tripId={trip.id} />
+              </TabsContent>
+
+              <TabsContent value="chat" className="space-y-6">
+                <TripChat tripId={trip.id} />
               </TabsContent>
             </Tabs>
           </div>
