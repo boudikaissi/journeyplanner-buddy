@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MapPin, Calendar, TrendingUp, Users } from "lucide-react";
 import TripCard from "@/components/TripCard";
 import CreateTripDialog from "@/components/CreateTripDialog";
@@ -6,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import heroImage from "@/assets/hero-travel.jpg";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [trips, setTrips] = useState([
     {
       id: "1",
@@ -142,7 +144,7 @@ const Index = () => {
                 <TripCard 
                   key={trip.id} 
                   trip={trip}
-                  onClick={() => console.log("Trip clicked:", trip.title)}
+                  onClick={() => navigate(`/trips/${trip.id}`)}
                 />
               ))}
             </div>
