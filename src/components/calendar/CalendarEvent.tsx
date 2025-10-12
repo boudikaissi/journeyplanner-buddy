@@ -35,6 +35,7 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
   const [dragType, setDragType] = useState<'move' | 'resize-top' | 'resize-bottom' | null>(null);
   const [tempStartTime, setTempStartTime] = useState<Date>(event.startTime);
   const [tempEndTime, setTempEndTime] = useState<Date>(event.endTime);
+  const [visualDayShift, setVisualDayShift] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(event.title);
   const [editLocation, setEditLocation] = useState(event.location || '');
@@ -45,6 +46,7 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
   useEffect(() => {
     setTempStartTime(event.startTime);
     setTempEndTime(event.endTime);
+    setVisualDayShift(0);
     tempStartRef.current = event.startTime;
     tempEndRef.current = event.endTime;
   }, [event.startTime, event.endTime]);
@@ -82,14 +84,16 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
 
       if (type === 'move') {
         let targetDate = event.startTime;
+        let dayShift = 0;
         
         // Calculate horizontal day shift if in week view
         if (allDates && currentDayIndex !== undefined && Math.abs(deltaX) > 10) {
           const dayColumnWidth = eventRef.current?.parentElement?.clientWidth || 0;
           if (dayColumnWidth > 0) {
-            const dayShift = Math.round(deltaX / dayColumnWidth);
+            dayShift = Math.round(deltaX / dayColumnWidth);
             const newDayIndex = Math.max(0, Math.min(allDates.length - 1, currentDayIndex + dayShift));
             targetDate = allDates[newDayIndex];
+            setVisualDayShift(dayShift);
           }
         }
         
@@ -129,6 +133,7 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
     const handlePointerUp = () => {
       setIsDragging(false);
       setDragType(null);
+      setVisualDayShift(0);
       
       // Commit changes using refs
       onUpdate(event.id, {
@@ -199,7 +204,9 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
       )}
       style={{
         top: `${top}px`,
-        height: `${Math.max(height, 15)}px`
+        height: `${Math.max(height, 15)}px`,
+        transform: visualDayShift !== 0 ? `translateX(${visualDayShift * 100}%)` : undefined,
+        transition: isDragging ? 'none' : 'transform 0.2s ease-out'
       }}
     >
       {/* Resize handle - top */}
