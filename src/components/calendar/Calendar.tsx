@@ -36,6 +36,12 @@ const Calendar = ({ date, events, onEventsChange }: CalendarProps) => {
   }, [events, onEventsChange]);
 
   const handleSlotPointerDown = useCallback((e: React.PointerEvent) => {
+    // Don't create event if clicking on an existing event
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-event-block]')) {
+      return;
+    }
+
     if (!containerRef.current) return;
     
     const rect = containerRef.current.getBoundingClientRect();
@@ -82,6 +88,31 @@ const Calendar = ({ date, events, onEventsChange }: CalendarProps) => {
     document.addEventListener('pointerup', handlePointerUp);
   }, [date, events, onEventsChange, createStart]);
 
+  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+    // Don't create event if clicking on an existing event
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-event-block]')) {
+      return;
+    }
+
+    if (!containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const offsetY = e.clientY - rect.top;
+    const minutes = snapToSlot(pixelsToMinutes(offsetY));
+
+    // Create 30-minute event
+    const newEvent: CalendarEvent = {
+      id: `event-${Date.now()}`,
+      title: 'New Event',
+      startTime: setTimeInMinutes(date, minutes),
+      endTime: setTimeInMinutes(date, minutes + 30),
+      category: 'other'
+    };
+
+    onEventsChange([...events, newEvent]);
+  }, [date, events, onEventsChange]);
+
   const gridTop = containerRef.current?.getBoundingClientRect().top || 0;
 
   return (
@@ -90,6 +121,7 @@ const Calendar = ({ date, events, onEventsChange }: CalendarProps) => {
         ref={containerRef}
         className="relative h-full overflow-y-auto"
         onPointerDown={handleSlotPointerDown}
+        onDoubleClick={handleDoubleClick}
       >
         <CalendarGrid date={date} />
         

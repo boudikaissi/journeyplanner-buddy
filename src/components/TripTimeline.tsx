@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Clock } from "lucide-react";
+import { useState, useRef } from "react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 import CalendarComponent from "./calendar/Calendar";
 import { CalendarEvent } from "./calendar/types";
 
@@ -12,7 +12,7 @@ interface TripTimelineProps {
 }
 
 const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(startDate));
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([
     {
       id: "1",
@@ -43,6 +43,14 @@ const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
     }
   ]);
 
+  // Generate array of dates from start to end
+  const tripDates: Date[] = [];
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    tripDates.push(new Date(d));
+  }
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -51,70 +59,88 @@ const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
     });
   };
 
-  const getEventsForDate = (date: Date) => {
-    return events.filter(event => {
-      const eventDate = new Date(event.startTime);
-      return eventDate.toDateString() === date.toDateString();
+  const formatDateShort = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[800px]">
-      {/* Calendar Picker */}
-      <div className="lg:col-span-1">
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle className="text-lg">Select Date</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => date && setSelectedDate(date)}
-              disabled={(date) => {
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                return date < start || date > end;
-              }}
-              className="rounded-md border"
-            />
-            <div className="mt-4 text-sm text-muted-foreground">
-              <p className="font-medium mb-1">Quick Tips:</p>
-              <ul className="space-y-1 text-xs">
-                <li>• Click and drag to create events</li>
-                <li>• Drag events to move them</li>
-                <li>• Resize from edges to adjust time</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -400, behavior: 'smooth' });
+    }
+  };
 
-      {/* Notion-style Calendar View */}
-      <div className="lg:col-span-3">
-        <Card className="h-full flex flex-col">
-          <CardHeader className="flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  {formatDate(selectedDate)}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {getEventsForDate(selectedDate).length} events scheduled
-                </p>
-              </div>
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 400, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="h-[800px]">
+      <Card className="h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <CardTitle>Trip Schedule</CardTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={scrollLeft}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={scrollRight}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
             </div>
-          </CardHeader>
-          <CardContent className="flex-1 min-h-0">
-            <CalendarComponent
-              date={selectedDate}
-              events={events}
-              onEventsChange={setEvents}
-            />
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardHeader>
+        <CardContent className="flex-1 min-h-0 p-0">
+          <div 
+            ref={scrollContainerRef}
+            className="h-full overflow-x-auto overflow-y-hidden"
+          >
+            <div className="flex h-full" style={{ minWidth: `${tripDates.length * 400}px` }}>
+              {tripDates.map((date, index) => (
+                <div 
+                  key={index} 
+                  className="flex-shrink-0 border-r last:border-r-0"
+                  style={{ width: '400px' }}
+                >
+                  <div className="h-full flex flex-col">
+                    <div className="px-4 py-3 border-b bg-muted/30">
+                      <div className="font-semibold text-sm">
+                        {formatDateShort(date)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {events.filter(event => {
+                          const eventDate = new Date(event.startTime);
+                          return eventDate.toDateString() === date.toDateString();
+                        }).length} events
+                      </div>
+                    </div>
+                    <div className="flex-1 min-h-0">
+                      <CalendarComponent
+                        date={date}
+                        events={events}
+                        onEventsChange={setEvents}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

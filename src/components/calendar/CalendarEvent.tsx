@@ -170,6 +170,7 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop }: Calendar
   return (
     <div
       ref={eventRef}
+      data-event-block
       className={cn(
         "absolute inset-x-2 rounded-md border border-primary/20 bg-primary/10 overflow-hidden transition-shadow",
         isDragging ? "shadow-lg ring-2 ring-primary/30" : "hover:shadow-md hover:border-primary/40",
