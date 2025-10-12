@@ -21,7 +21,7 @@ const Calendar = ({ date, events, onEventsChange }: CalendarProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const [createStart, setCreateStart] = useState<{ y: number; minutes: number } | null>(null);
 
-  const handleEventUpdate = useCallback((eventId: string, updates: { startTime?: Date; endTime?: Date }) => {
+  const handleEventUpdate = useCallback((eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string }) => {
     const updatedEvents = events.map(event =>
       event.id === eventId
         ? { ...event, ...updates }

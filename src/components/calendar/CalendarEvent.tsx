@@ -12,24 +12,37 @@ import {
   PIXELS_PER_HOUR
 } from './utils';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 interface CalendarEventProps {
   event: CalendarEvent;
-  onUpdate: (eventId: string, updates: { startTime?: Date; endTime?: Date }) => void;
+  onUpdate: (eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string }) => void;
   gridTop: number;
 }
 
 const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps) => {
   const eventRef = useRef<HTMLDivElement>(null);
+  const tempStartRef = useRef<Date>(event.startTime);
+  const tempEndRef = useRef<Date>(event.endTime);
   const [isDragging, setIsDragging] = useState(false);
   const [dragType, setDragType] = useState<'move' | 'resize-top' | 'resize-bottom' | null>(null);
   const [tempStartTime, setTempStartTime] = useState<Date>(event.startTime);
   const [tempEndTime, setTempEndTime] = useState<Date>(event.endTime);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(event.title);
+  const [editLocation, setEditLocation] = useState(event.location || '');
+  const [editStartTime, setEditStartTime] = useState('');
+  const [editEndTime, setEditEndTime] = useState('');
 
   // Reset temp times when event prop changes
   useEffect(() => {
     setTempStartTime(event.startTime);
     setTempEndTime(event.endTime);
+    tempStartRef.current = event.startTime;
+    tempEndRef.current = event.endTime;
   }, [event.startTime, event.endTime]);
 
   const startMinutes = getTimeInMinutes(tempStartTime);
@@ -58,15 +71,22 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
         const newStartMinutes = clampMinutes(getTimeInMinutes(initialStartTime) + deltaMinutes);
         const newEndMinutes = clampMinutes(getTimeInMinutes(initialEndTime) + deltaMinutes);
         
-        setTempStartTime(setTimeInMinutes(event.startTime, newStartMinutes));
-        setTempEndTime(setTimeInMinutes(event.endTime, newEndMinutes));
+        const newStart = setTimeInMinutes(event.startTime, newStartMinutes);
+        const newEnd = setTimeInMinutes(event.endTime, newEndMinutes);
+        
+        tempStartRef.current = newStart;
+        tempEndRef.current = newEnd;
+        setTempStartTime(newStart);
+        setTempEndTime(newEnd);
       } else if (type === 'resize-top') {
         const newStartMinutes = clampMinutes(getTimeInMinutes(initialStartTime) + deltaMinutes);
         const currentEndMinutes = getTimeInMinutes(initialEndTime);
         
         // Ensure minimum 15 minutes duration
         if (currentEndMinutes - newStartMinutes >= 15) {
-          setTempStartTime(setTimeInMinutes(event.startTime, newStartMinutes));
+          const newStart = setTimeInMinutes(event.startTime, newStartMinutes);
+          tempStartRef.current = newStart;
+          setTempStartTime(newStart);
         }
       } else if (type === 'resize-bottom') {
         const newEndMinutes = clampMinutes(getTimeInMinutes(initialEndTime) + deltaMinutes);
@@ -74,7 +94,9 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
         
         // Ensure minimum 15 minutes duration
         if (newEndMinutes - currentStartMinutes >= 15) {
-          setTempEndTime(setTimeInMinutes(event.endTime, newEndMinutes));
+          const newEnd = setTimeInMinutes(event.endTime, newEndMinutes);
+          tempEndRef.current = newEnd;
+          setTempEndTime(newEnd);
         }
       }
     };
@@ -83,10 +105,10 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
       setIsDragging(false);
       setDragType(null);
       
-      // Commit changes
+      // Commit changes using refs
       onUpdate(event.id, {
-        startTime: tempStartTime,
-        endTime: tempEndTime
+        startTime: tempStartRef.current,
+        endTime: tempEndRef.current
       });
 
       document.removeEventListener('pointermove', handlePointerMove);
@@ -96,6 +118,44 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
     document.addEventListener('pointermove', handlePointerMove);
     document.addEventListener('pointerup', handlePointerUp);
   }, [event, tempStartTime, tempEndTime, onUpdate]);
+
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    if (!isDragging) {
+      setIsEditing(true);
+      setEditTitle(event.title);
+      setEditLocation(event.location || '');
+      setEditStartTime(formatTime(event.startTime));
+      setEditEndTime(formatTime(event.endTime));
+    }
+  }, [isDragging, event]);
+
+  const handleSaveEdit = useCallback(() => {
+    const parseTime = (timeStr: string, baseDate: Date): Date => {
+      const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!match) return baseDate;
+      
+      let hours = parseInt(match[1]);
+      const minutes = parseInt(match[2]);
+      const period = match[3].toUpperCase();
+      
+      if (period === 'PM' && hours !== 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      
+      return setTimeInMinutes(baseDate, hours * 60 + minutes);
+    };
+
+    const newStartTime = parseTime(editStartTime, event.startTime);
+    const newEndTime = parseTime(editEndTime, event.endTime);
+
+    onUpdate(event.id, {
+      title: editTitle,
+      location: editLocation,
+      startTime: newStartTime,
+      endTime: newEndTime
+    });
+    
+    setIsEditing(false);
+  }, [editTitle, editLocation, editStartTime, editEndTime, event, onUpdate]);
 
   return (
     <div
@@ -120,8 +180,9 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
 
       {/* Event content */}
       <div
-        className="px-2 py-1 h-full overflow-hidden cursor-move select-none"
+        className="px-2 py-1 h-full overflow-hidden cursor-pointer select-none"
         onPointerDown={(e) => handlePointerDown(e, 'move')}
+        onClick={handleClick}
       >
         <div className="text-xs font-medium text-primary truncate">
           {event.title}
@@ -141,6 +202,63 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
         className="absolute inset-x-0 bottom-0 h-1 cursor-ns-resize hover:bg-primary/30 transition-colors"
         onPointerDown={(e) => handlePointerDown(e, 'resize-bottom')}
       />
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent onClick={(e) => e.stopPropagation()}>
+          <DialogHeader>
+            <DialogTitle>Edit Event</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Event title"
+              />
+            </div>
+            <div>
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                value={editLocation}
+                onChange={(e) => setEditLocation(e.target.value)}
+                placeholder="Event location (optional)"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="startTime">Start Time</Label>
+                <Input
+                  id="startTime"
+                  value={editStartTime}
+                  onChange={(e) => setEditStartTime(e.target.value)}
+                  placeholder="9:00 AM"
+                />
+              </div>
+              <div>
+                <Label htmlFor="endTime">End Time</Label>
+                <Input
+                  id="endTime"
+                  value={editEndTime}
+                  onChange={(e) => setEditEndTime(e.target.value)}
+                  placeholder="10:00 AM"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
