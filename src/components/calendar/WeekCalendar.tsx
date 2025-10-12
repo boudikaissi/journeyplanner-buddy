@@ -192,6 +192,8 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
                             onUpdate={handleEventUpdate}
                             onDelete={handleEventDelete}
                             gridTop={gridTop}
+                            allDates={dates}
+                            currentDayIndex={dayIndex}
                           />
                         ))}
                     </div>

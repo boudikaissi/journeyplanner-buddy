@@ -22,9 +22,11 @@ interface CalendarEventProps {
   onUpdate: (eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string }) => void;
   onDelete: (eventId: string) => void;
   gridTop: number;
+  allDates?: Date[];
+  currentDayIndex?: number;
 }
 
-const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop }: CalendarEventProps) => {
+const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, currentDayIndex }: CalendarEventProps) => {
   const eventRef = useRef<HTMLDivElement>(null);
   const tempStartRef = useRef<Date>(event.startTime);
   const tempEndRef = useRef<Date>(event.endTime);
@@ -63,25 +65,39 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop }: Calendar
     setDragType(type);
 
     const startY = e.clientY;
+    const startX = e.clientX;
     const initialStartTime = new Date(tempStartTime);
     const initialEndTime = new Date(tempEndTime);
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       const deltaY = moveEvent.clientY - startY;
+      const deltaX = moveEvent.clientX - startX;
       
       // Mark as dragged if moved more than 3 pixels
-      if (Math.abs(deltaY) > 3) {
+      if (Math.abs(deltaY) > 3 || Math.abs(deltaX) > 3) {
         hasDraggedRef.current = true;
       }
       
       const deltaMinutes = snapToSlot(pixelsToMinutes(deltaY));
 
       if (type === 'move') {
+        let targetDate = event.startTime;
+        
+        // Calculate horizontal day shift if in week view
+        if (allDates && currentDayIndex !== undefined && Math.abs(deltaX) > 10) {
+          const dayColumnWidth = eventRef.current?.parentElement?.clientWidth || 0;
+          if (dayColumnWidth > 0) {
+            const dayShift = Math.round(deltaX / dayColumnWidth);
+            const newDayIndex = Math.max(0, Math.min(allDates.length - 1, currentDayIndex + dayShift));
+            targetDate = allDates[newDayIndex];
+          }
+        }
+        
         const newStartMinutes = clampMinutes(getTimeInMinutes(initialStartTime) + deltaMinutes);
         const newEndMinutes = clampMinutes(getTimeInMinutes(initialEndTime) + deltaMinutes);
         
-        const newStart = setTimeInMinutes(event.startTime, newStartMinutes);
-        const newEnd = setTimeInMinutes(event.endTime, newEndMinutes);
+        const newStart = setTimeInMinutes(targetDate, newStartMinutes);
+        const newEnd = setTimeInMinutes(targetDate, newEndMinutes);
         
         tempStartRef.current = newStart;
         tempEndRef.current = newEnd;
