@@ -129,6 +129,9 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop }: Calendar
   }, [event, tempStartTime, tempEndTime, onUpdate]);
 
   const handleClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
     // Only open edit dialog if we didn't drag
     if (!hasDraggedRef.current) {
       setIsEditing(true);
