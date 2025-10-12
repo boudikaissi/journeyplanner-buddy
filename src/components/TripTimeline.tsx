@@ -1,20 +1,9 @@
 import { useState } from "react";
-import { Plus, Clock, MapPin } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
-
-interface TimelineEvent {
-  id: string;
-  title: string;
-  description?: string;
-  startTime: string;
-  endTime: string;
-  date: string;
-  location?: string;
-  category: "activity" | "transport" | "accommodation" | "meal" | "other";
-}
+import CalendarComponent from "./calendar/Calendar";
+import { CalendarEvent } from "./calendar/types";
 
 interface TripTimelineProps {
   tripId: string;
@@ -24,14 +13,13 @@ interface TripTimelineProps {
 
 const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(startDate));
-  const [events] = useState<TimelineEvent[]>([
+  const [events, setEvents] = useState<CalendarEvent[]>([
     {
       id: "1",
       title: "Flight to Bali",
       description: "Departure from San Francisco",
-      startTime: "08:00",
-      endTime: "14:00",
-      date: "2024-08-15",
+      startTime: new Date(`${startDate}T08:00:00`),
+      endTime: new Date(`${startDate}T14:00:00`),
       location: "SFO Airport",
       category: "transport"
     },
@@ -39,9 +27,8 @@ const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
       id: "2", 
       title: "Hotel Check-in",
       description: "Ubud Resort",
-      startTime: "15:00",
-      endTime: "16:00",
-      date: "2024-08-15",
+      startTime: new Date(`${startDate}T15:00:00`),
+      endTime: new Date(`${startDate}T16:00:00`),
       location: "Ubud Resort",
       category: "accommodation"
     },
@@ -49,9 +36,8 @@ const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
       id: "3",
       title: "Temple Tour",
       description: "Visit ancient temples in Ubud",
-      startTime: "09:00",
-      endTime: "12:00",
-      date: "2024-08-16",
+      startTime: new Date(new Date(startDate).getTime() + 24 * 60 * 60 * 1000 + 9 * 60 * 60 * 1000),
+      endTime: new Date(new Date(startDate).getTime() + 24 * 60 * 60 * 1000 + 12 * 60 * 60 * 1000),
       location: "Ubud",
       category: "activity"
     }
@@ -66,27 +52,17 @@ const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
   };
 
   const getEventsForDate = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return events.filter(event => event.date === dateStr);
+    return events.filter(event => {
+      const eventDate = new Date(event.startTime);
+      return eventDate.toDateString() === date.toDateString();
+    });
   };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "activity": return "bg-blue-100 text-blue-800 border-blue-200";
-      case "transport": return "bg-green-100 text-green-800 border-green-200";
-      case "accommodation": return "bg-purple-100 text-purple-800 border-purple-200";
-      case "meal": return "bg-orange-100 text-orange-800 border-orange-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const hoursArray = Array.from({ length: 24 }, (_, i) => i);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[800px]">
       {/* Calendar Picker */}
       <div className="lg:col-span-1">
-        <Card>
+        <Card className="h-full">
           <CardHeader>
             <CardTitle className="text-lg">Select Date</CardTitle>
           </CardHeader>
@@ -102,14 +78,22 @@ const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
               }}
               className="rounded-md border"
             />
+            <div className="mt-4 text-sm text-muted-foreground">
+              <p className="font-medium mb-1">Quick Tips:</p>
+              <ul className="space-y-1 text-xs">
+                <li>• Click and drag to create events</li>
+                <li>• Drag events to move them</li>
+                <li>• Resize from edges to adjust time</li>
+              </ul>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Timeline View */}
+      {/* Notion-style Calendar View */}
       <div className="lg:col-span-3">
-        <Card>
-          <CardHeader>
+        <Card className="h-full flex flex-col">
+          <CardHeader className="flex-shrink-0">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
@@ -120,66 +104,14 @@ const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
                   {getEventsForDate(selectedDate).length} events scheduled
                 </p>
               </div>
-              <Button size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Event
-              </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Hour Grid */}
-              <div className="grid grid-cols-24 gap-1 text-xs text-muted-foreground mb-4">
-                {hoursArray.map(hour => (
-                  <div key={hour} className="text-center">
-                    {hour.toString().padStart(2, '0')}
-                  </div>
-                ))}
-              </div>
-
-              {/* Events */}
-              <div className="space-y-3">
-                {getEventsForDate(selectedDate).length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No events scheduled for this day
-                  </div>
-                ) : (
-                  getEventsForDate(selectedDate).map((event) => (
-                    <div 
-                      key={event.id}
-                      className="flex items-start gap-4 p-4 rounded-lg border border-border/50 hover:shadow-soft transition-all cursor-pointer"
-                    >
-                      <div className="flex-shrink-0 text-sm font-mono text-muted-foreground min-w-[100px]">
-                        {event.startTime} - {event.endTime}
-                      </div>
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-foreground">{event.title}</h4>
-                          <Badge 
-                            variant="outline" 
-                            className={`${getCategoryColor(event.category)} border text-xs`}
-                          >
-                            {event.category}
-                          </Badge>
-                        </div>
-                        
-                        {event.description && (
-                          <p className="text-sm text-muted-foreground mb-2">{event.description}</p>
-                        )}
-                        
-                        {event.location && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <MapPin className="w-3 h-3" />
-                            <span>{event.location}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+          <CardContent className="flex-1 min-h-0">
+            <CalendarComponent
+              date={selectedDate}
+              events={events}
+              onEventsChange={setEvents}
+            />
           </CardContent>
         </Card>
       </div>
