@@ -20,13 +20,15 @@ import { Button } from '@/components/ui/button';
 interface CalendarEventProps {
   event: CalendarEvent;
   onUpdate: (eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string }) => void;
+  onDelete: (eventId: string) => void;
   gridTop: number;
 }
 
-const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps) => {
+const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop }: CalendarEventProps) => {
   const eventRef = useRef<HTMLDivElement>(null);
   const tempStartRef = useRef<Date>(event.startTime);
   const tempEndRef = useRef<Date>(event.endTime);
+  const hasDraggedRef = useRef(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragType, setDragType] = useState<'move' | 'resize-top' | 'resize-bottom' | null>(null);
   const [tempStartTime, setTempStartTime] = useState<Date>(event.startTime);
@@ -56,6 +58,7 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
     e.stopPropagation();
     e.preventDefault();
     
+    hasDraggedRef.current = false;
     setIsDragging(true);
     setDragType(type);
 
@@ -65,6 +68,12 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       const deltaY = moveEvent.clientY - startY;
+      
+      // Mark as dragged if moved more than 3 pixels
+      if (Math.abs(deltaY) > 3) {
+        hasDraggedRef.current = true;
+      }
+      
       const deltaMinutes = snapToSlot(pixelsToMinutes(deltaY));
 
       if (type === 'move') {
@@ -120,14 +129,15 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
   }, [event, tempStartTime, tempEndTime, onUpdate]);
 
   const handleClick = useCallback((e: React.MouseEvent) => {
-    if (!isDragging) {
+    // Only open edit dialog if we didn't drag
+    if (!hasDraggedRef.current) {
       setIsEditing(true);
       setEditTitle(event.title);
       setEditLocation(event.location || '');
       setEditStartTime(formatTime(event.startTime));
       setEditEndTime(formatTime(event.endTime));
     }
-  }, [isDragging, event]);
+  }, [event]);
 
   const handleSaveEdit = useCallback(() => {
     const parseTime = (timeStr: string, baseDate: Date): Date => {
@@ -248,13 +258,24 @@ const CalendarEventComponent = ({ event, onUpdate, gridTop }: CalendarEventProps
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsEditing(false)}>
-                Cancel
+            <div className="flex justify-between gap-2">
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  onDelete(event.id);
+                  setIsEditing(false);
+                }}
+              >
+                Delete
               </Button>
-              <Button onClick={handleSaveEdit}>
-                Save
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveEdit}>
+                  Save
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>

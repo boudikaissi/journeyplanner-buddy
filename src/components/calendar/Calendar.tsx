@@ -30,6 +30,11 @@ const Calendar = ({ date, events, onEventsChange }: CalendarProps) => {
     onEventsChange(updatedEvents);
   }, [events, onEventsChange]);
 
+  const handleEventDelete = useCallback((eventId: string) => {
+    const updatedEvents = events.filter(event => event.id !== eventId);
+    onEventsChange(updatedEvents);
+  }, [events, onEventsChange]);
+
   const handleSlotPointerDown = useCallback((e: React.PointerEvent) => {
     if (!containerRef.current) return;
     
@@ -101,6 +106,7 @@ const Calendar = ({ date, events, onEventsChange }: CalendarProps) => {
                   key={event.id}
                   event={event}
                   onUpdate={handleEventUpdate}
+                  onDelete={handleEventDelete}
                   gridTop={gridTop}
                 />
               ))}
