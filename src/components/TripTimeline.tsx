@@ -1,8 +1,6 @@
-import { useState, useRef } from "react";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import CalendarComponent from "./calendar/Calendar";
+import WeekCalendar from "./calendar/WeekCalendar";
 import { CalendarEvent } from "./calendar/types";
 
 interface TripTimelineProps {
@@ -12,7 +10,6 @@ interface TripTimelineProps {
 }
 
 const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([
     {
       id: "1",
@@ -51,94 +48,18 @@ const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
     tripDates.push(new Date(d));
   }
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long', 
-      day: 'numeric'
-    });
-  };
-
-  const formatDateShort = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -400, behavior: 'smooth' });
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 400, behavior: 'smooth' });
-    }
-  };
-
   return (
     <div className="h-[800px]">
       <Card className="h-full flex flex-col">
         <CardHeader className="flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <CardTitle>Trip Schedule</CardTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={scrollLeft}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={scrollRight}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
+          <CardTitle>Trip Schedule</CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 min-h-0 p-0">
-          <div 
-            ref={scrollContainerRef}
-            className="h-full overflow-x-auto overflow-y-hidden"
-          >
-            <div className="flex h-full" style={{ minWidth: `${tripDates.length * 400}px` }}>
-              {tripDates.map((date, index) => (
-                <div 
-                  key={index} 
-                  className="flex-shrink-0 border-r last:border-r-0"
-                  style={{ width: '400px' }}
-                >
-                  <div className="h-full flex flex-col">
-                    <div className="px-4 py-3 border-b bg-muted/30">
-                      <div className="font-semibold text-sm">
-                        {formatDateShort(date)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {events.filter(event => {
-                          const eventDate = new Date(event.startTime);
-                          return eventDate.toDateString() === date.toDateString();
-                        }).length} events
-                      </div>
-                    </div>
-                    <div className="flex-1 min-h-0">
-                      <CalendarComponent
-                        date={date}
-                        events={events}
-                        onEventsChange={setEvents}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        <CardContent className="flex-1 min-h-0 p-4">
+          <WeekCalendar
+            dates={tripDates}
+            events={events}
+            onEventsChange={setEvents}
+          />
         </CardContent>
       </Card>
     </div>
