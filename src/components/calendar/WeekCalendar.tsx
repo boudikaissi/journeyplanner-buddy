@@ -17,8 +17,16 @@ interface WeekCalendarProps {
 
 const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [createStart, setCreateStart] = useState<{ dayIndex: number; minutes: number } | null>(null);
+  const [visibleStartIndex, setVisibleStartIndex] = useState(0);
+  
+  const DAYS_VISIBLE = 5;
+  const visibleDates = dates.slice(visibleStartIndex, visibleStartIndex + DAYS_VISIBLE);
+  
+  // Get month and year for the first visible date
+  const monthYear = visibleDates[0]?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) || '';
 
   const handleEventUpdate = useCallback((eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string }) => {
     const updatedEvents = events.map(event =>
@@ -34,7 +42,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
     onEventsChange(updatedEvents);
   }, [events, onEventsChange]);
 
-  const handleSlotPointerDown = useCallback((e: React.PointerEvent, dayIndex: number) => {
+  const handleSlotPointerDown = useCallback((e: React.PointerEvent, visibleDayIndex: number) => {
     const target = e.target as HTMLElement;
     if (target.closest('[data-event-block]')) {
       return;
@@ -46,8 +54,10 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
     const offsetY = e.clientY - rect.top;
     const minutes = snapToSlot(pixelsToMinutes(offsetY));
     
+    const actualDayIndex = visibleStartIndex + visibleDayIndex;
+    
     setIsCreating(true);
-    setCreateStart({ dayIndex, minutes });
+    setCreateStart({ dayIndex: actualDayIndex, minutes });
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       // Visual feedback could be added here
@@ -67,8 +77,8 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
         const newEvent: CalendarEvent = {
           id: `event-${Date.now()}`,
           title: 'New Event',
-          startTime: setTimeInMinutes(dates[dayIndex], startMin),
-          endTime: setTimeInMinutes(dates[dayIndex], endMin),
+          startTime: setTimeInMinutes(dates[actualDayIndex], startMin),
+          endTime: setTimeInMinutes(dates[actualDayIndex], endMin),
           category: 'other'
         };
 
@@ -83,9 +93,9 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
 
     document.addEventListener('pointermove', handlePointerMove);
     document.addEventListener('pointerup', handlePointerUp);
-  }, [dates, events, onEventsChange, createStart]);
+  }, [dates, events, onEventsChange, createStart, visibleStartIndex]);
 
-  const handleDoubleClick = useCallback((e: React.MouseEvent, dayIndex: number) => {
+  const handleDoubleClick = useCallback((e: React.MouseEvent, visibleDayIndex: number) => {
     const target = e.target as HTMLElement;
     if (target.closest('[data-event-block]')) {
       return;
@@ -96,17 +106,19 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
     const rect = containerRef.current.getBoundingClientRect();
     const offsetY = e.clientY - rect.top;
     const minutes = snapToSlot(pixelsToMinutes(offsetY));
+    
+    const actualDayIndex = visibleStartIndex + visibleDayIndex;
 
     const newEvent: CalendarEvent = {
       id: `event-${Date.now()}`,
       title: 'New Event',
-      startTime: setTimeInMinutes(dates[dayIndex], minutes),
-      endTime: setTimeInMinutes(dates[dayIndex], minutes + 30),
+      startTime: setTimeInMinutes(dates[actualDayIndex], minutes),
+      endTime: setTimeInMinutes(dates[actualDayIndex], minutes + 30),
       category: 'other'
     };
 
     onEventsChange([...events, newEvent]);
-  }, [dates, events, onEventsChange]);
+  }, [dates, events, onEventsChange, visibleStartIndex]);
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const gridTop = containerRef.current?.getBoundingClientRect().top || 0;
@@ -117,17 +129,51 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
     return { day, dayNum };
   };
 
+  const handleScroll = useCallback((e: React.WheelEvent) => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      // Horizontal scroll
+      if (e.deltaX > 0 && visibleStartIndex + DAYS_VISIBLE < dates.length) {
+        setVisibleStartIndex(prev => Math.min(prev + 1, dates.length - DAYS_VISIBLE));
+      } else if (e.deltaX < 0 && visibleStartIndex > 0) {
+        setVisibleStartIndex(prev => Math.max(prev - 1, 0));
+      }
+    }
+  }, [visibleStartIndex, dates.length]);
+
   return (
     <div className="h-full flex flex-col">
+      {/* Month/Year header */}
+      <div className="px-4 py-2 border-b bg-background">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">{monthYear}</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setVisibleStartIndex(prev => Math.max(prev - 1, 0))}
+              disabled={visibleStartIndex === 0}
+              className="px-2 py-1 text-sm border rounded hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ←
+            </button>
+            <button
+              onClick={() => setVisibleStartIndex(prev => Math.min(prev + 1, dates.length - DAYS_VISIBLE))}
+              disabled={visibleStartIndex + DAYS_VISIBLE >= dates.length}
+              className="px-2 py-1 text-sm border rounded hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Header with dates */}
       <div className="flex border-b sticky top-0 bg-background z-10">
         <div className="w-20 flex-shrink-0 border-r" />
-        {dates.map((date, index) => {
+        {visibleDates.map((date, index) => {
           const { day, dayNum } = formatDateHeader(date);
           const isToday = date.toDateString() === new Date().toDateString();
           return (
             <div
-              key={index}
+              key={visibleStartIndex + index}
               className="flex-1 min-w-0 border-r last:border-r-0 p-2 text-center"
             >
               <div className="text-xs text-muted-foreground">{day}</div>
@@ -140,7 +186,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
       </div>
 
       {/* Scrollable calendar grid */}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto" onWheel={handleScroll}>
         <div ref={containerRef} className="relative" style={{ height: `${24 * PIXELS_PER_HOUR}px` }}>
           {/* Time grid */}
           <div className="flex">
@@ -161,45 +207,48 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
 
             {/* Day columns with grid lines */}
             <div className="flex-1 flex relative">
-              {dates.map((date, dayIndex) => (
-                <div
-                  key={dayIndex}
-                  className="flex-1 border-r last:border-r-0 relative"
-                  onPointerDown={(e) => handleSlotPointerDown(e, dayIndex)}
-                  onDoubleClick={(e) => handleDoubleClick(e, dayIndex)}
-                >
-                  {/* Hour grid lines */}
-                  {hours.map(hour => (
-                    <div
-                      key={hour}
-                      className="border-b"
-                      style={{ height: `${PIXELS_PER_HOUR}px` }}
-                    />
-                  ))}
+              {visibleDates.map((date, visibleDayIndex) => {
+                const actualDayIndex = visibleStartIndex + visibleDayIndex;
+                return (
+                  <div
+                    key={actualDayIndex}
+                    className="flex-1 border-r last:border-r-0 relative"
+                    onPointerDown={(e) => handleSlotPointerDown(e, visibleDayIndex)}
+                    onDoubleClick={(e) => handleDoubleClick(e, visibleDayIndex)}
+                  >
+                    {/* Hour grid lines */}
+                    {hours.map(hour => (
+                      <div
+                        key={hour}
+                        className="border-b"
+                        style={{ height: `${PIXELS_PER_HOUR}px` }}
+                      />
+                    ))}
 
-                  {/* Events for this day */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="relative h-full pointer-events-auto">
-                      {events
-                        .filter(event => {
-                          const eventDate = new Date(event.startTime);
-                          return eventDate.toDateString() === date.toDateString();
-                        })
-                        .map(event => (
-                          <CalendarEventComponent
-                            key={event.id}
-                            event={event}
-                            onUpdate={handleEventUpdate}
-                            onDelete={handleEventDelete}
-                            gridTop={gridTop}
-                            allDates={dates}
-                            currentDayIndex={dayIndex}
-                          />
-                        ))}
+                    {/* Events for this day */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="relative h-full pointer-events-auto">
+                        {events
+                          .filter(event => {
+                            const eventDate = new Date(event.startTime);
+                            return eventDate.toDateString() === date.toDateString();
+                          })
+                          .map(event => (
+                            <CalendarEventComponent
+                              key={event.id}
+                              event={event}
+                              onUpdate={handleEventUpdate}
+                              onDelete={handleEventDelete}
+                              gridTop={gridTop}
+                              allDates={dates}
+                              currentDayIndex={actualDayIndex}
+                            />
+                          ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
