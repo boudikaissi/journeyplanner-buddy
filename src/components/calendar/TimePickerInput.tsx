@@ -87,7 +87,11 @@ const TimePickerInput = ({ value, onChange, placeholder = "Select time" }: TimeP
           <Clock className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0 pointer-events-auto" align="start">
+      <PopoverContent 
+        className="w-[200px] p-0 pointer-events-auto" 
+        align="start"
+        onWheel={(e) => e.stopPropagation()}
+      >
         <div className="p-2">
           <Input
             ref={inputRef}
@@ -98,7 +102,10 @@ const TimePickerInput = ({ value, onChange, placeholder = "Select time" }: TimeP
             onClick={(e) => e.stopPropagation()}
           />
         </div>
-        <div className="max-h-[200px] overflow-y-auto overscroll-contain">
+        <div 
+          className="max-h-[200px] overflow-y-auto overscroll-contain"
+          onWheel={(e) => e.stopPropagation()}
+        >
           <div className="p-1">
             {filteredOptions.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
