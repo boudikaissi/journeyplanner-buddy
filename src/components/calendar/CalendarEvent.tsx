@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import TimePickerInput from './TimePickerInput';
 
 interface CalendarEventProps {
   event: CalendarEvent;
@@ -242,7 +243,10 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
 
       {/* Edit Dialog */}
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent onClick={(e) => e.stopPropagation()}>
+        <DialogContent 
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           <DialogHeader>
             <DialogTitle>Edit Event</DialogTitle>
           </DialogHeader>
@@ -267,21 +271,19 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="startTime">Start Time</Label>
-                <Input
-                  id="startTime"
+                <Label>Start Time</Label>
+                <TimePickerInput
                   value={editStartTime}
-                  onChange={(e) => setEditStartTime(e.target.value)}
-                  placeholder="9:00 AM"
+                  onChange={setEditStartTime}
+                  placeholder="Select start time"
                 />
               </div>
               <div>
-                <Label htmlFor="endTime">End Time</Label>
-                <Input
-                  id="endTime"
+                <Label>End Time</Label>
+                <TimePickerInput
                   value={editEndTime}
-                  onChange={(e) => setEditEndTime(e.target.value)}
-                  placeholder="10:00 AM"
+                  onChange={setEditEndTime}
+                  placeholder="Select end time"
                 />
               </div>
             </div>
