@@ -88,7 +88,7 @@ const TimePickerInput = ({ value, onChange, placeholder = "Select time" }: TimeP
           <Clock className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
+      <PopoverContent className="w-[200px] p-0 pointer-events-auto" align="start">
         <div className="p-2">
           <Input
             ref={inputRef}
@@ -99,8 +99,8 @@ const TimePickerInput = ({ value, onChange, placeholder = "Select time" }: TimeP
             onClick={(e) => e.stopPropagation()}
           />
         </div>
-        <ScrollArea className="h-[200px]">
-          <div className="p-1">
+        <ScrollArea className="h-[200px] pointer-events-auto">
+          <div className="p-1 pointer-events-auto">
             {filteredOptions.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
                 No times found
