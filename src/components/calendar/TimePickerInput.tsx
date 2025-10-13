@@ -2,7 +2,6 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Clock } from 'lucide-react';
 
 interface TimePickerInputProps {
@@ -99,8 +98,8 @@ const TimePickerInput = ({ value, onChange, placeholder = "Select time" }: TimeP
             onClick={(e) => e.stopPropagation()}
           />
         </div>
-        <ScrollArea className="h-[200px] pointer-events-auto">
-          <div className="p-1 pointer-events-auto">
+        <div className="max-h-[200px] overflow-y-auto overscroll-contain">
+          <div className="p-1">
             {filteredOptions.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
                 No times found
@@ -118,7 +117,7 @@ const TimePickerInput = ({ value, onChange, placeholder = "Select time" }: TimeP
               ))
             )}
           </div>
-        </ScrollArea>
+        </div>
       </PopoverContent>
     </Popover>
   );
