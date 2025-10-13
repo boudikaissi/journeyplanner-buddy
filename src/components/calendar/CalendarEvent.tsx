@@ -288,7 +288,9 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
             <div className="flex justify-between gap-2">
               <Button 
                 variant="destructive" 
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
                   onDelete(event.id);
                   setIsEditing(false);
                 }}
@@ -296,10 +298,18 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
                 Delete
               </Button>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                <Button variant="outline" onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setIsEditing(false);
+                }}>
                   Cancel
                 </Button>
-                <Button onClick={handleSaveEdit}>
+                <Button onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleSaveEdit();
+                }}>
                   Save
                 </Button>
               </div>
