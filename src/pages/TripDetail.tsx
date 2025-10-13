@@ -179,158 +179,100 @@ const TripDetail = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid grid-cols-6 w-full">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                <TabsTrigger value="participants">Participants</TabsTrigger>
-                <TabsTrigger value="ideas">Ideas</TabsTrigger>
-                <TabsTrigger value="checklist">Checklist</TabsTrigger>
-                <TabsTrigger value="chat">Chat</TabsTrigger>
-              </TabsList>
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid grid-cols-6 w-full">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="participants">Participants</TabsTrigger>
+            <TabsTrigger value="ideas">Ideas</TabsTrigger>
+            <TabsTrigger value="checklist">Checklist</TabsTrigger>
+            <TabsTrigger value="chat">Chat</TabsTrigger>
+          </TabsList>
 
-              <TabsContent value="overview" className="space-y-6">
-                {/* Destinations */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5" />
-                      Destinations
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {trip.locations.map((location, index) => (
-                      <div key={location.id} className="flex items-start gap-4 p-4 rounded-lg border border-border/50 hover:shadow-soft transition-all">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-foreground">{location.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-2">{location.description}</p>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>{formatDate(location.startDate)} - {formatDate(location.endDate)}</span>
-                            <span>{getDaysDifference(location.startDate, location.endDate)} days</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button 
-                    variant="outline" 
-                    className="h-16 flex-col gap-2"
-                    onClick={() => navigate(`/trips/${trip.id}/map`)}
-                  >
-                    <MapPin className="w-5 h-5" />
-                    View Map
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="h-16 flex-col gap-2"
-                    onClick={() => navigate(`/trips/${trip.id}/calendar`)}
-                  >
-                    <Calendar className="w-5 h-5" />
-                    Calendar
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="h-16 flex-col gap-2"
-                    onClick={() => navigate(`/trips/${trip.id}/spending`)}
-                  >
-                    <Star className="w-5 h-5" />
-                    Expenses
-                  </Button>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="timeline" className="space-y-6">
-                <TripTimeline 
-                  tripId={trip.id}
-                  startDate={trip.startDate}
-                  endDate={trip.endDate}
-                />
-              </TabsContent>
-
-              <TabsContent value="participants" className="space-y-6">
-                <TripParticipants 
-                  tripId={trip.id}
-                  participants={trip.participants}
-                />
-              </TabsContent>
-
-              <TabsContent value="ideas" className="space-y-6">
-                <TripIdeas tripId={trip.id} />
-              </TabsContent>
-
-              <TabsContent value="checklist" className="space-y-6">
-                <TripChecklist tripId={trip.id} />
-              </TabsContent>
-
-              <TabsContent value="chat" className="space-y-6">
-                <TripChat tripId={trip.id} />
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Participants */}
+          <TabsContent value="overview" className="space-y-6">
+            {/* Destinations */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Travelers ({trip.participants.length})
+                  <MapPin className="w-5 h-5" />
+                  Destinations
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {trip.participants.map((participant) => (
-                  <div key={participant.userId} className="flex items-center gap-3">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={participant.user?.avatar} />
-                      <AvatarFallback>
-                        {participant.user?.name?.charAt(0) || "U"}
-                      </AvatarFallback>
-                    </Avatar>
+              <CardContent className="space-y-4">
+                {trip.locations.map((location, index) => (
+                  <div key={location.id} className="flex items-start gap-4 p-4 rounded-lg border border-border/50 hover:shadow-soft transition-all">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
+                      {index + 1}
+                    </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium">{participant.user?.name}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{participant.role}</p>
+                      <h3 className="font-semibold text-foreground">{location.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">{location.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>{formatDate(location.startDate)} - {formatDate(location.endDate)}</span>
+                        <span>{getDaysDifference(location.startDate, location.endDate)} days</span>
+                      </div>
                     </div>
                   </div>
                 ))}
               </CardContent>
             </Card>
 
-            {/* Budget Overview */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Budget Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">
-                    ${trip.budget.total.toLocaleString()} {trip.budget.currency}
-                  </div>
-                  <p className="text-sm text-muted-foreground">Total Budget</p>
-                </div>
-                
-                <div className="space-y-2">
-                  {Object.entries(trip.budget.categories).map(([category, amount]) => (
-                    <div key={category} className="flex justify-between text-sm">
-                      <span className="capitalize text-muted-foreground">{category}</span>
-                      <span className="font-medium">${amount}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button 
+                variant="outline" 
+                className="h-16 flex-col gap-2"
+                onClick={() => navigate(`/trips/${trip.id}/map`)}
+              >
+                <MapPin className="w-5 h-5" />
+                View Map
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-16 flex-col gap-2"
+                onClick={() => navigate(`/trips/${trip.id}/calendar`)}
+              >
+                <Calendar className="w-5 h-5" />
+                Calendar
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-16 flex-col gap-2"
+                onClick={() => navigate(`/trips/${trip.id}/spending`)}
+              >
+                <Star className="w-5 h-5" />
+                Expenses
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="timeline" className="space-y-6">
+            <TripTimeline 
+              tripId={trip.id}
+              startDate={trip.startDate}
+              endDate={trip.endDate}
+            />
+          </TabsContent>
+
+          <TabsContent value="participants" className="space-y-6">
+            <TripParticipants 
+              tripId={trip.id}
+              participants={trip.participants}
+            />
+          </TabsContent>
+
+          <TabsContent value="ideas" className="space-y-6">
+            <TripIdeas tripId={trip.id} />
+          </TabsContent>
+
+          <TabsContent value="checklist" className="space-y-6">
+            <TripChecklist tripId={trip.id} />
+          </TabsContent>
+
+          <TabsContent value="chat" className="space-y-6">
+            <TripChat tripId={trip.id} />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
