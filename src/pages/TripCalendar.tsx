@@ -115,144 +115,60 @@ const TripCalendar = () => {
 
       {/* Calendar Content */}
       <main className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Calendar View */}
-          <div className="lg:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  Trip Schedule
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {Object.entries(groupedEvents).map(([date, dayEvents]) => (
-                  <div key={date} className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-primary"></div>
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {formatDate(date)}
-                      </h3>
-                    </div>
-                    
-                    <div className="space-y-3 ml-6">
-                      {dayEvents.map((event) => (
-                        <div 
-                          key={event.id}
-                          className="flex items-center gap-4 p-4 rounded-lg border border-border/50 hover:shadow-soft transition-all"
-                        >
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                            <span className="text-sm font-medium text-muted-foreground flex-shrink-0">
-                              {event.time}
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <h4 className="font-medium text-foreground truncate">
-                                {event.title}
-                              </h4>
-                              <div className="flex items-center gap-1 mt-1">
-                                <MapPin className="w-3 h-3 text-muted-foreground" />
-                                <span className="text-xs text-muted-foreground">
-                                  {event.location}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <Badge 
-                            variant="outline" 
-                            className={`${getEventColor(event.type)} border flex-shrink-0`}
-                          >
-                            {event.type}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">{events.length}</div>
-                  <p className="text-sm text-muted-foreground">Total Events</p>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Trip Schedule
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {Object.entries(groupedEvents).map(([date, dayEvents]) => (
+              <div key={date} className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-primary"></div>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {formatDate(date)}
+                  </h3>
                 </div>
                 
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Activities</span>
-                    <span className="font-medium">
-                      {events.filter(e => e.type === "activity").length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Transportation</span>
-                    <span className="font-medium">
-                      {events.filter(e => e.type === "transportation").length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Accommodation</span>
-                    <span className="font-medium">
-                      {events.filter(e => e.type === "accommodation").length}
-                    </span>
-                  </div>
+                <div className="space-y-3 ml-6">
+                  {dayEvents.map((event) => (
+                    <div 
+                      key={event.id}
+                      className="flex items-center gap-4 p-4 rounded-lg border border-border/50 hover:shadow-soft transition-all"
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm font-medium text-muted-foreground flex-shrink-0">
+                          {event.time}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-medium text-foreground truncate">
+                            {event.title}
+                          </h4>
+                          <div className="flex items-center gap-1 mt-1">
+                            <MapPin className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              {event.location}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <Badge 
+                        variant="outline" 
+                        className={`${getEventColor(event.type)} border flex-shrink-0`}
+                      >
+                        {event.type}
+                      </Badge>
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Legend */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Event Types</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                  <span className="text-sm">Activities</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="text-sm">Transportation</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="text-sm">Accommodation</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Activity
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Set Reminder
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Clock className="w-4 h-4 mr-2" />
-                  View Timeline
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
