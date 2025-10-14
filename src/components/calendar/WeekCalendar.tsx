@@ -140,12 +140,10 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
             {hours.map(hour => (
               <div
                 key={hour}
-                className="relative text-xs text-foreground text-right pr-2 bg-background"
-                style={{ height: `${PIXELS_PER_HOUR}px` }}
+                className="relative text-xs text-foreground text-right pr-2 bg-background border-t border-transparent"
+                style={{ height: `${PIXELS_PER_HOUR}px`, paddingTop: '2px' }}
               >
-                <span className="absolute top-0 right-2 transform -translate-y-2">
-                  {formatHour(hour)}
-                </span>
+                {formatHour(hour)}
               </div>
             ))}
           </div>
