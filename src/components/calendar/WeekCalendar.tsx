@@ -145,10 +145,12 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
             {hours.filter(hour => hour !== 0).map(hour => (
               <div
                 key={hour}
-                className="relative text-xs text-foreground text-right pr-2 bg-background border-t border-transparent"
-                style={{ height: `${PIXELS_PER_HOUR}px`, paddingTop: '8px' }}
+                className="relative text-xs text-foreground text-right pr-2 bg-background border-t border-transparent flex items-start"
+                style={{ height: `${PIXELS_PER_HOUR}px`, paddingTop: '0px' }}
               >
-                {formatHour(hour)}
+                <span className="w-full" style={{ transform: 'translateY(-50%)' }}>
+                  {formatHour(hour)}
+                </span>
               </div>
             ))}
           </div>
