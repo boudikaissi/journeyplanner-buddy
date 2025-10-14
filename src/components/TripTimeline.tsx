@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WeekCalendar from "./calendar/WeekCalendar";
+import CreateEventDialog from "./calendar/CreateEventDialog";
 import { CalendarEvent } from "./calendar/types";
 
 interface TripTimelineProps {
@@ -48,11 +49,18 @@ const TripTimeline = ({ tripId, startDate, endDate }: TripTimelineProps) => {
     tripDates.push(new Date(d));
   }
 
+  const handleCreateEvent = (event: CalendarEvent) => {
+    setEvents([...events, event]);
+  };
+
   return (
     <div className="h-[800px]">
       <Card className="h-full flex flex-col">
         <CardHeader className="flex-shrink-0">
-          <CardTitle>Trip Schedule</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Trip Schedule</CardTitle>
+            <CreateEventDialog dates={tripDates} onCreateEvent={handleCreateEvent} />
+          </div>
         </CardHeader>
         <CardContent className="flex-1 min-h-0 p-4">
           <WeekCalendar
