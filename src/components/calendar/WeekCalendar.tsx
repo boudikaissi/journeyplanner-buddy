@@ -137,7 +137,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
             <div className="h-12 border-b bg-background sticky top-0 z-50" />
             
             {/* All-day label row */}
-            <div className="text-xs text-foreground text-right pr-2 bg-background min-h-8 flex items-center justify-end border-b">
+            <div className="text-xs text-foreground text-right pr-2 bg-background h-12 flex items-center justify-end border-b">
               All-day
             </div>
             
@@ -177,7 +177,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
               </div>
               
               {/* All-day events row */}
-              <div className="flex border-b min-h-8 bg-background">
+              <div className="flex border-b h-12 bg-background">
                 {dates.map((date, dayIndex) => {
                   const allDayEvents = events.filter(event => {
                     const eventDate = new Date(event.startTime);
