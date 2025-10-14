@@ -136,8 +136,13 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
             {/* Top-left corner box - stays fixed */}
             <div className="h-12 border-b bg-background sticky top-0 z-50" />
             
+            {/* All-day label row */}
+            <div className="text-xs text-foreground text-right pr-2 bg-background min-h-8 flex items-center justify-end border-b">
+              All-day
+            </div>
+            
             {/* Time labels */}
-            {hours.map(hour => (
+            {hours.filter(hour => hour !== 0).map(hour => (
               <div
                 key={hour}
                 className="relative text-xs text-foreground text-right pr-2 bg-background border-t border-transparent"
@@ -185,9 +190,6 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
                       className="border-r last:border-r-0 flex-shrink-0 p-1 space-y-1"
                       style={{ width: '200px' }}
                     >
-                      {allDayEvents.length === 0 && (
-                        <div className="text-xs text-muted-foreground px-2 py-1">All-day</div>
-                      )}
                       {allDayEvents.map(event => (
                         <AllDayEvent
                           key={event.id}
