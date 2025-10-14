@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TimePickerInput from './TimePickerInput';
 
 interface CalendarEventProps {
@@ -44,6 +45,7 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
   const [editStartTime, setEditStartTime] = useState('');
   const [editEndTime, setEditEndTime] = useState('');
   const [editAllDay, setEditAllDay] = useState(event.allDay || false);
+  const [editDate, setEditDate] = useState<string>('');
 
   // Reset temp times when event prop changes
   useEffect(() => {
@@ -164,6 +166,7 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
       setEditStartTime(formatTime(event.startTime));
       setEditEndTime(formatTime(event.endTime));
       setEditAllDay(event.allDay || false);
+      setEditDate(event.startTime.toISOString());
     }
   }, [event]);
 
@@ -182,8 +185,11 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
       return setTimeInMinutes(baseDate, hours * 60 + minutes);
     };
 
-    const newStartTime = editAllDay ? event.startTime : parseTime(editStartTime, event.startTime);
-    const newEndTime = editAllDay ? event.endTime : parseTime(editEndTime, event.endTime);
+    // Use the selected date or fall back to the original event date
+    const selectedDate = editDate ? new Date(editDate) : event.startTime;
+    
+    const newStartTime = editAllDay ? selectedDate : parseTime(editStartTime, selectedDate);
+    const newEndTime = editAllDay ? selectedDate : parseTime(editEndTime, selectedDate);
 
     onUpdate(event.id, {
       title: editTitle,
@@ -194,7 +200,7 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
     });
     
     setIsEditing(false);
-  }, [editTitle, editLocation, editStartTime, editEndTime, editAllDay, event, onUpdate]);
+  }, [editTitle, editLocation, editStartTime, editEndTime, editAllDay, editDate, event, onUpdate]);
 
   return (
     <div
@@ -280,6 +286,31 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
                 placeholder="Event location (optional)"
               />
             </div>
+            {allDates && allDates.length > 0 && (
+              <div>
+                <Label htmlFor="event-date">Date</Label>
+                <Select value={editDate} onValueChange={setEditDate}>
+                  <SelectTrigger id="event-date">
+                    <SelectValue placeholder="Select date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allDates.map((date) => {
+                      const dateStr = date.toISOString();
+                      const displayStr = date.toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      });
+                      return (
+                        <SelectItem key={dateStr} value={dateStr}>
+                          {displayStr}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex items-center justify-between py-2">
               <Label htmlFor="all-day" className="cursor-pointer">All Day</Label>
               <Switch

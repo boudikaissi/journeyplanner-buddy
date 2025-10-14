@@ -200,6 +200,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
                           event={event}
                           onUpdate={handleEventUpdate}
                           onDelete={handleEventDelete}
+                          allDates={dates}
                         />
                       ))}
                     </div>

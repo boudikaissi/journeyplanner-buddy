@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TimePickerInput from './TimePickerInput';
 import { formatTime, setTimeInMinutes } from './utils';
 
@@ -12,15 +13,17 @@ interface AllDayEventProps {
   event: CalendarEvent;
   onUpdate: (eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string; allDay?: boolean }) => void;
   onDelete: (eventId: string) => void;
+  allDates?: Date[];
 }
 
-const AllDayEvent = ({ event, onUpdate, onDelete }: AllDayEventProps) => {
+const AllDayEvent = ({ event, onUpdate, onDelete, allDates }: AllDayEventProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(event.title);
   const [editLocation, setEditLocation] = useState(event.location || '');
   const [editStartTime, setEditStartTime] = useState(formatTime(event.startTime));
   const [editEndTime, setEditEndTime] = useState(formatTime(event.endTime));
   const [editAllDay, setEditAllDay] = useState(event.allDay || false);
+  const [editDate, setEditDate] = useState<string>('');
 
   const handleClick = () => {
     setIsEditing(true);
@@ -29,6 +32,7 @@ const AllDayEvent = ({ event, onUpdate, onDelete }: AllDayEventProps) => {
     setEditStartTime(formatTime(event.startTime));
     setEditEndTime(formatTime(event.endTime));
     setEditAllDay(event.allDay || false);
+    setEditDate(event.startTime.toISOString());
   };
 
   const handleSaveEdit = () => {
@@ -46,8 +50,11 @@ const AllDayEvent = ({ event, onUpdate, onDelete }: AllDayEventProps) => {
       return setTimeInMinutes(baseDate, hours * 60 + minutes);
     };
 
-    const newStartTime = editAllDay ? event.startTime : parseTime(editStartTime, event.startTime);
-    const newEndTime = editAllDay ? event.endTime : parseTime(editEndTime, event.endTime);
+    // Use the selected date or fall back to the original event date
+    const selectedDate = editDate ? new Date(editDate) : event.startTime;
+
+    const newStartTime = editAllDay ? selectedDate : parseTime(editStartTime, selectedDate);
+    const newEndTime = editAllDay ? selectedDate : parseTime(editEndTime, selectedDate);
 
     onUpdate(event.id, {
       title: editTitle,
@@ -102,6 +109,31 @@ const AllDayEvent = ({ event, onUpdate, onDelete }: AllDayEventProps) => {
                 placeholder="Event location (optional)"
               />
             </div>
+            {allDates && allDates.length > 0 && (
+              <div>
+                <Label htmlFor="event-date">Date</Label>
+                <Select value={editDate} onValueChange={setEditDate}>
+                  <SelectTrigger id="event-date">
+                    <SelectValue placeholder="Select date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allDates.map((date) => {
+                      const dateStr = date.toISOString();
+                      const displayStr = date.toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      });
+                      return (
+                        <SelectItem key={dateStr} value={dateStr}>
+                          {displayStr}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex items-center justify-between py-2">
               <Label htmlFor="all-day" className="cursor-pointer">All Day</Label>
               <Switch
