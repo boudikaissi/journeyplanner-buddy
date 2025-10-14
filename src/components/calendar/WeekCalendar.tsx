@@ -129,9 +129,9 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
 
       {/* Scrollable wrapper for both directions */}
       <div className="flex-1 overflow-auto">
-        <div className="flex h-full relative">
+        <div className="flex" style={{ minHeight: `${24 * PIXELS_PER_HOUR + 48}px` }}>
           {/* Time labels column - sticky on left */}
-          <div className="w-20 flex-shrink-0 sticky left-0 bg-background z-30 border-r">
+          <div className="w-20 flex-shrink-0 sticky left-0 bg-background z-30 border-r" style={{ height: `${24 * PIXELS_PER_HOUR + 48}px` }}>
             {/* Top-left corner box - stays fixed */}
             <div className="h-12 border-b bg-background sticky top-0 z-50" />
             
