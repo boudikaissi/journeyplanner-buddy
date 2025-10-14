@@ -112,6 +112,19 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
     onEventsChange([...events, newEvent]);
   }, [dates, events, onEventsChange]);
 
+  const handleAllDayDoubleClick = useCallback((dayIndex: number) => {
+    const newEvent: CalendarEvent = {
+      id: `event-${Date.now()}`,
+      title: 'New Event',
+      startTime: new Date(dates[dayIndex]),
+      endTime: new Date(dates[dayIndex]),
+      category: 'other',
+      allDay: true
+    };
+
+    onEventsChange([...events, newEvent]);
+  }, [dates, events, onEventsChange]);
+
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const gridTop = containerRef.current?.getBoundingClientRect().top || 0;
 
@@ -193,6 +206,10 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
                       key={dayIndex}
                       className="border-r last:border-r-0 flex-shrink-0 p-1 space-y-1"
                       style={{ width: '200px' }}
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        handleAllDayDoubleClick(dayIndex);
+                      }}
                     >
                       {allDayEvents.map(event => (
                         <AllDayEvent
