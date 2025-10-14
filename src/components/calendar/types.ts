@@ -6,6 +6,7 @@ export interface CalendarEvent {
   category?: string;
   location?: string;
   description?: string;
+  allDay?: boolean;
 }
 
 export interface TimeSlot {

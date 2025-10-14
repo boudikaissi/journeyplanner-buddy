@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { CalendarEvent } from './types';
 import CalendarEventComponent from './CalendarEvent';
+import AllDayEvent from './AllDayEvent';
 import {
   setTimeInMinutes,
   snapToSlot,
@@ -23,7 +24,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
   // Get month and year for display
   const monthYear = dates[0]?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) || '';
 
-  const handleEventUpdate = useCallback((eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string }) => {
+  const handleEventUpdate = useCallback((eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string; allDay?: boolean }) => {
     const updatedEvents = events.map(event =>
       event.id === eventId
         ? { ...event, ...updates }
@@ -152,23 +153,55 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
           {/* Calendar content */}
           <div className="flex-1">
             {/* Header with dates - sticky */}
-            <div className="flex sticky top-0 bg-background z-20 border-b h-12">
-              {dates.map((date, index) => {
-                const { day, dayNum } = formatDateHeader(date);
-                const isToday = date.toDateString() === new Date().toDateString();
-                return (
-                  <div
-                    key={index}
-                    className="border-r last:border-r-0 p-2 text-center flex-shrink-0 bg-background"
-                    style={{ width: '200px' }}
-                  >
-                    <div className="text-xs text-foreground">{day}</div>
-                    <div className={`text-sm font-semibold ${isToday ? 'text-primary' : ''}`}>
-                      {dayNum}
+            <div className="sticky top-0 bg-background z-20">
+              <div className="flex border-b h-12">
+                {dates.map((date, index) => {
+                  const { day, dayNum } = formatDateHeader(date);
+                  const isToday = date.toDateString() === new Date().toDateString();
+                  return (
+                    <div
+                      key={index}
+                      className="border-r last:border-r-0 p-2 text-center flex-shrink-0 bg-background"
+                      style={{ width: '200px' }}
+                    >
+                      <div className="text-xs text-foreground">{day}</div>
+                      <div className={`text-sm font-semibold ${isToday ? 'text-primary' : ''}`}>
+                        {dayNum}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              
+              {/* All-day events row */}
+              <div className="flex border-b min-h-8 bg-background">
+                {dates.map((date, dayIndex) => {
+                  const allDayEvents = events.filter(event => {
+                    const eventDate = new Date(event.startTime);
+                    return event.allDay && eventDate.toDateString() === date.toDateString();
+                  });
+                  
+                  return (
+                    <div
+                      key={dayIndex}
+                      className="border-r last:border-r-0 flex-shrink-0 p-1 space-y-1"
+                      style={{ width: '200px' }}
+                    >
+                      {allDayEvents.length === 0 && (
+                        <div className="text-xs text-muted-foreground px-2 py-1">All-day</div>
+                      )}
+                      {allDayEvents.map(event => (
+                        <AllDayEvent
+                          key={event.id}
+                          event={event}
+                          onUpdate={handleEventUpdate}
+                          onDelete={handleEventDelete}
+                        />
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Calendar grid */}
@@ -196,7 +229,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
                       {events
                         .filter(event => {
                           const eventDate = new Date(event.startTime);
-                          return eventDate.toDateString() === date.toDateString();
+                          return !event.allDay && eventDate.toDateString() === date.toDateString();
                         })
                         .map(event => (
                           <CalendarEventComponent

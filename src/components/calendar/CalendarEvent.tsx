@@ -16,11 +16,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import TimePickerInput from './TimePickerInput';
 
 interface CalendarEventProps {
   event: CalendarEvent;
-  onUpdate: (eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string }) => void;
+  onUpdate: (eventId: string, updates: { startTime?: Date; endTime?: Date; title?: string; location?: string; allDay?: boolean }) => void;
   onDelete: (eventId: string) => void;
   gridTop: number;
   allDates?: Date[];
@@ -42,6 +43,7 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
   const [editLocation, setEditLocation] = useState(event.location || '');
   const [editStartTime, setEditStartTime] = useState('');
   const [editEndTime, setEditEndTime] = useState('');
+  const [editAllDay, setEditAllDay] = useState(event.allDay || false);
 
   // Reset temp times when event prop changes
   useEffect(() => {
@@ -161,6 +163,7 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
       setEditLocation(event.location || '');
       setEditStartTime(formatTime(event.startTime));
       setEditEndTime(formatTime(event.endTime));
+      setEditAllDay(event.allDay || false);
     }
   }, [event]);
 
@@ -179,23 +182,25 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
       return setTimeInMinutes(baseDate, hours * 60 + minutes);
     };
 
-    const newStartTime = parseTime(editStartTime, event.startTime);
-    const newEndTime = parseTime(editEndTime, event.endTime);
+    const newStartTime = editAllDay ? event.startTime : parseTime(editStartTime, event.startTime);
+    const newEndTime = editAllDay ? event.endTime : parseTime(editEndTime, event.endTime);
 
     onUpdate(event.id, {
       title: editTitle,
       location: editLocation,
       startTime: newStartTime,
-      endTime: newEndTime
+      endTime: newEndTime,
+      allDay: editAllDay
     });
     
     setIsEditing(false);
-  }, [editTitle, editLocation, editStartTime, editEndTime, event, onUpdate]);
+  }, [editTitle, editLocation, editStartTime, editEndTime, editAllDay, event, onUpdate]);
 
   return (
     <div
       ref={eventRef}
       data-event-block
+      data-event-id={event.id}
       className={cn(
         "absolute inset-x-2 rounded-md border border-primary/20 bg-primary/10 overflow-hidden transition-shadow",
         isDragging ? "shadow-lg ring-2 ring-primary/30" : "hover:shadow-md hover:border-primary/40",
@@ -275,24 +280,34 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
                 placeholder="Event location (optional)"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Start Time</Label>
-                <TimePickerInput
-                  value={editStartTime}
-                  onChange={setEditStartTime}
-                  placeholder="Select start time"
-                />
-              </div>
-              <div>
-                <Label>End Time</Label>
-                <TimePickerInput
-                  value={editEndTime}
-                  onChange={setEditEndTime}
-                  placeholder="Select end time"
-                />
-              </div>
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="all-day" className="cursor-pointer">All Day</Label>
+              <Switch
+                id="all-day"
+                checked={editAllDay}
+                onCheckedChange={setEditAllDay}
+              />
             </div>
+            {!editAllDay && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Start Time</Label>
+                  <TimePickerInput
+                    value={editStartTime}
+                    onChange={setEditStartTime}
+                    placeholder="Select start time"
+                  />
+                </div>
+                <div>
+                  <Label>End Time</Label>
+                  <TimePickerInput
+                    value={editEndTime}
+                    onChange={setEditEndTime}
+                    placeholder="Select end time"
+                  />
+                </div>
+              </div>
+            )}
             <div className="flex justify-between gap-2">
               <Button 
                 variant="destructive" 
