@@ -143,7 +143,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
                 className="relative text-xs text-foreground text-right pr-2 bg-background"
                 style={{ height: `${PIXELS_PER_HOUR}px` }}
               >
-                <span className="absolute -top-2 right-2">
+                <span className="absolute top-0 right-2 -translate-y-1/2">
                   {formatHour(hour)}
                 </span>
               </div>
