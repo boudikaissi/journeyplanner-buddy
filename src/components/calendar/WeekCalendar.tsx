@@ -122,7 +122,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-background">
+    <div className="h-full flex flex-col overflow-hidden bg-white">
       {/* Month/Year header */}
       <div className="px-4 py-2 border-b flex-shrink-0">
         <h2 className="text-lg font-semibold">{monthYear}</h2>
@@ -132,12 +132,12 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
       <div className="flex-1 overflow-auto">
         <div className="flex" style={{ minHeight: `${24 * PIXELS_PER_HOUR + 48}px` }}>
           {/* Time labels column - sticky on left */}
-          <div className="w-20 flex-shrink-0 sticky left-0 bg-background z-30 border-r" style={{ height: `${24 * PIXELS_PER_HOUR + 48}px` }}>
+          <div className="w-20 flex-shrink-0 sticky left-0 bg-white z-30 border-r" style={{ height: `${24 * PIXELS_PER_HOUR + 48}px` }}>
             {/* Top-left corner box - stays fixed */}
-            <div className="h-12 border-b bg-background sticky top-0 z-50" />
+            <div className="h-12 border-b bg-white sticky top-0 z-50" />
             
             {/* All-day label row */}
-            <div className="text-xs text-foreground text-right pr-2 bg-background h-12 flex items-center justify-end border-b sticky top-12 z-40">
+            <div className="text-xs text-foreground text-right pr-2 bg-white h-12 flex items-center justify-end border-b sticky top-12 z-40">
               All-day
             </div>
             
@@ -145,7 +145,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
             {hours.map(hour => (
               <div
                 key={hour}
-                className="relative text-xs text-foreground text-right pr-2 bg-background border-t border-transparent flex items-start"
+                className="relative text-xs text-foreground text-right pr-2 bg-white border-t border-transparent flex items-start"
                 style={{ height: `${PIXELS_PER_HOUR}px`, paddingTop: '0px' }}
               >
                 {hour !== 0 && (
@@ -160,7 +160,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
           {/* Calendar content */}
           <div className="flex-1">
             {/* Header with dates - sticky */}
-            <div className="sticky top-0 bg-background z-20">
+            <div className="sticky top-0 bg-white z-20">
               <div className="flex border-b h-12">
                 {dates.map((date, index) => {
                   const { day, dayNum } = formatDateHeader(date);
@@ -168,7 +168,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
                   return (
                     <div
                       key={index}
-                      className="border-r last:border-r-0 p-2 text-center flex-shrink-0 bg-background"
+                      className="border-r last:border-r-0 p-2 text-center flex-shrink-0 bg-white"
                       style={{ width: '200px' }}
                     >
                       <div className="text-xs text-foreground">{day}</div>
@@ -181,7 +181,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
               </div>
               
               {/* All-day events row */}
-              <div className="flex border-b h-12 bg-background">
+              <div className="flex border-b h-12 bg-white">
                 {dates.map((date, dayIndex) => {
                   const allDayEvents = events.filter(event => {
                     const eventDate = new Date(event.startTime);
