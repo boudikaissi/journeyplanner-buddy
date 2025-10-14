@@ -129,15 +129,15 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
 
       {/* Scrollable wrapper for both directions */}
       <div className="flex-1 overflow-auto relative">
-        <div className="flex h-full min-h-full">
-          {/* Time labels column - sticky */}
-          <div className="w-20 flex-shrink-0 sticky left-0 bg-background z-40 border-r">
-            <div className="h-12 border-b sticky top-0 bg-background z-50" />
+        {/* Time labels column - sticky on left */}
+        <div className="w-20 flex-shrink-0 absolute left-0 top-0 bottom-0 bg-background z-40 border-r">
+          <div className="h-12 border-b sticky top-0 bg-background z-50" />
+          <div className="relative" style={{ height: `${24 * PIXELS_PER_HOUR}px` }}>
             {hours.map(hour => (
               <div
                 key={hour}
-                className="relative text-xs text-foreground text-right pr-2 bg-background border-r"
-                style={{ height: `${PIXELS_PER_HOUR}px` }}
+                className="absolute text-xs text-foreground text-right pr-2 bg-background w-full border-r"
+                style={{ height: `${PIXELS_PER_HOUR}px`, top: `${hour * PIXELS_PER_HOUR}px` }}
               >
                 <span className="absolute -top-2 right-2">
                   {formatHour(hour)}
@@ -145,72 +145,72 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Calendar content */}
-          <div className="flex-1 min-h-full">
-            {/* Header with dates - sticky */}
-            <div className="flex sticky top-0 bg-background z-30 border-b h-12">
-              {dates.map((date, index) => {
-                const { day, dayNum } = formatDateHeader(date);
-                const isToday = date.toDateString() === new Date().toDateString();
-                return (
-                  <div
-                    key={index}
-                    className="border-r last:border-r-0 p-2 text-center flex-shrink-0 bg-background"
-                    style={{ width: '200px' }}
-                  >
-                    <div className="text-xs text-foreground">{day}</div>
-                    <div className={`text-sm font-semibold ${isToday ? 'text-primary' : ''}`}>
-                      {dayNum}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Calendar grid */}
-            <div ref={containerRef} className="relative flex" style={{ height: `${24 * PIXELS_PER_HOUR}px` }}>
-              {dates.map((date, dayIndex) => (
+        {/* Calendar content with padding for time column */}
+        <div className="pl-20">
+          {/* Header with dates - sticky */}
+          <div className="flex sticky top-0 bg-background z-30 border-b h-12">
+            {dates.map((date, index) => {
+              const { day, dayNum } = formatDateHeader(date);
+              const isToday = date.toDateString() === new Date().toDateString();
+              return (
                 <div
-                  key={dayIndex}
-                  className="border-r last:border-r-0 relative flex-shrink-0"
+                  key={index}
+                  className="border-r last:border-r-0 p-2 text-center flex-shrink-0 bg-background"
                   style={{ width: '200px' }}
-                  onPointerDown={(e) => handleSlotPointerDown(e, dayIndex)}
-                  onDoubleClick={(e) => handleDoubleClick(e, dayIndex)}
                 >
-                  {/* Hour grid lines */}
-                  {hours.map(hour => (
-                    <div
-                      key={hour}
-                      className="border-b border-border/20"
-                      style={{ height: `${PIXELS_PER_HOUR}px` }}
-                    />
-                  ))}
-
-                  {/* Events for this day */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="relative h-full pointer-events-auto">
-                      {events
-                        .filter(event => {
-                          const eventDate = new Date(event.startTime);
-                          return eventDate.toDateString() === date.toDateString();
-                        })
-                        .map(event => (
-                          <CalendarEventComponent
-                            key={event.id}
-                            event={event}
-                            onUpdate={handleEventUpdate}
-                            onDelete={handleEventDelete}
-                            gridTop={gridTop}
-                            allDates={dates}
-                            currentDayIndex={dayIndex}
-                          />
-                        ))}
-                    </div>
+                  <div className="text-xs text-foreground">{day}</div>
+                  <div className={`text-sm font-semibold ${isToday ? 'text-primary' : ''}`}>
+                    {dayNum}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
+          </div>
+
+          {/* Calendar grid */}
+          <div ref={containerRef} className="relative flex" style={{ height: `${24 * PIXELS_PER_HOUR}px` }}>
+            {dates.map((date, dayIndex) => (
+              <div
+                key={dayIndex}
+                className="border-r last:border-r-0 relative flex-shrink-0"
+                style={{ width: '200px' }}
+                onPointerDown={(e) => handleSlotPointerDown(e, dayIndex)}
+                onDoubleClick={(e) => handleDoubleClick(e, dayIndex)}
+              >
+                {/* Hour grid lines */}
+                {hours.map(hour => (
+                  <div
+                    key={hour}
+                    className="border-b border-border/20"
+                    style={{ height: `${PIXELS_PER_HOUR}px` }}
+                  />
+                ))}
+
+                {/* Events for this day */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="relative h-full pointer-events-auto">
+                    {events
+                      .filter(event => {
+                        const eventDate = new Date(event.startTime);
+                        return eventDate.toDateString() === date.toDateString();
+                      })
+                      .map(event => (
+                        <CalendarEventComponent
+                          key={event.id}
+                          event={event}
+                          onUpdate={handleEventUpdate}
+                          onDelete={handleEventDelete}
+                          gridTop={gridTop}
+                          allDates={dates}
+                          currentDayIndex={dayIndex}
+                        />
+                      ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
