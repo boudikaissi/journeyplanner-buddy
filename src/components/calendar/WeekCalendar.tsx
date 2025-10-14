@@ -137,7 +137,7 @@ const WeekCalendar = ({ dates, events, onEventsChange }: WeekCalendarProps) => {
             <div className="h-12 border-b bg-background sticky top-0 z-50" />
             
             {/* All-day label row */}
-            <div className="text-xs text-foreground text-right pr-2 bg-background h-12 flex items-center justify-end border-b">
+            <div className="text-xs text-foreground text-right pr-2 bg-background h-12 flex items-center justify-end border-b sticky top-12 z-40">
               All-day
             </div>
             
