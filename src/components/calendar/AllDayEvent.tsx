@@ -32,7 +32,15 @@ const AllDayEvent = ({ event, onUpdate, onDelete, allDates }: AllDayEventProps) 
     setEditStartTime(formatTime(event.startTime));
     setEditEndTime(formatTime(event.endTime));
     setEditAllDay(event.allDay || false);
-    setEditDate(event.startTime.toISOString());
+    
+    // Find the matching date from allDates
+    if (allDates) {
+      const eventDateStr = event.startTime.toDateString();
+      const matchingDate = allDates.find(date => date.toDateString() === eventDateStr);
+      setEditDate(matchingDate ? matchingDate.toISOString() : event.startTime.toISOString());
+    } else {
+      setEditDate(event.startTime.toISOString());
+    }
   };
 
   const handleSaveEdit = () => {

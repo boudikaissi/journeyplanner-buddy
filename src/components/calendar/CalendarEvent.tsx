@@ -166,9 +166,17 @@ const CalendarEventComponent = ({ event, onUpdate, onDelete, gridTop, allDates, 
       setEditStartTime(formatTime(event.startTime));
       setEditEndTime(formatTime(event.endTime));
       setEditAllDay(event.allDay || false);
-      setEditDate(event.startTime.toISOString());
+      
+      // Find the matching date from allDates
+      if (allDates) {
+        const eventDateStr = event.startTime.toDateString();
+        const matchingDate = allDates.find(date => date.toDateString() === eventDateStr);
+        setEditDate(matchingDate ? matchingDate.toISOString() : event.startTime.toISOString());
+      } else {
+        setEditDate(event.startTime.toISOString());
+      }
     }
-  }, [event]);
+  }, [event, allDates]);
 
   const handleSaveEdit = useCallback(() => {
     const parseTime = (timeStr: string, baseDate: Date): Date => {
