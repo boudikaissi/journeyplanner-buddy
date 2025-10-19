@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import WeekCalendar from "./WeekCalendar";
 import CreateEventDialog from "./CreateEventDialog";
 import { CalendarEvent } from "./types";
