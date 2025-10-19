@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import WeekCalendar from "./calendar/WeekCalendar";
-import CreateEventDialog from "./calendar/CreateEventDialog";
-import { CalendarEvent } from "./calendar/types";
+import WeekCalendar from "./WeekCalendar";
+import CreateEventDialog from "./CreateEventDialog";
+import { CalendarEvent } from "./types";
 
 interface TripTimelineProps {
   tripId: string;

@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import type { Trip } from "@/types/trip";
-import TripTimeline from "@/components/TripTimeline";
+import TripTimeline from "@/components/calendar/TripTimeline";
 import TripParticipants from "@/components/TripParticipants";
 import TripIdeas from "@/components/TripIdeas";
 import TripChecklist from "@/components/TripChecklist";
